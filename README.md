@@ -102,6 +102,6 @@ El bot no avanza al siguiente paso hasta completar el anterior, y maneja edge ca
 ## 👨‍💻 Autor
 
 **Ayrton Cela** — Consulting Engineering Manager & AI Builder  
-[linkedin.com/in/ayrtonc-66361a203](https://linkedin.com/in/ayrtonc-66361a203) · Ciudad de México 🇲🇽
+Ciudad de México 🇲🇽
 
 > *Construido con vibe coding usando Claude Code*
