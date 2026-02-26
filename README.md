@@ -7,6 +7,7 @@
 
 ## 🚀 Demo en vivo
 
+🎥 **Video demo:** [Ver en YouTube](https://www.youtube.com/watch?v=_C-984BwlBQ)  
 🌐 **Frontend:** [web-page-saa-s.vercel.app](https://web-page-saa-s.vercel.app)  
 💬 **Chatbot widget:** disponible en la esquina inferior derecha del sitio
 
@@ -137,6 +138,7 @@ whatsapp-bot/
 - [ ] Migrar persistencia de sesión a Supabase (PostgreSQL)
 - [ ] Agregar canal Telegram con el mismo backend
 - [ ] Dashboard de citas en tiempo real
+- [x] Video demo grabado y publicado
 - [ ] Pasar a producción con número de WhatsApp Business real
 - [ ] Integración con Google Calendar API
 - [ ] Deploy del backend en Railway (actualmente local)
