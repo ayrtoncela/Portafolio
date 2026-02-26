@@ -16,12 +16,12 @@
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────┐
-│  WhatsApp User  │────▶│  Meta Cloud API   │────▶│  Node.js    │
+│  WhatsApp User  │────▶│  Meta Cloud API  │────▶│  Node.js    │
 └─────────────────┘     └──────────────────┘     │  Backend    │
-                                                  │  (Express)  │
-                                                  └──────┬──────┘
-                                                         │
-                                              ┌──────────▼──────────┐
+                                                 │  (Express)  │
+                                                 └──────┬──────┘
+                                                        │
+                                              ┌─────────▼───────────┐
                                               │   OpenAI GPT-4      │
                                               │   (system prompt    │
                                               │    por vertical)    │
