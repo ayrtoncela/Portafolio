@@ -1,7 +1,7 @@
 # 🤖 WhatsApp AI Bot — Multi-Industry Framework
 
 > Agente conversacional multicanal construido con Node.js + OpenAI GPT-3.5 + Meta Cloud API.  
-> Un solo backend soporta múltiples industrias, canales y flujos de negocio — con logging automático y notificaciones en tiempo real.
+> Un solo backend soporta múltiples industrias, canales y flujos de negocio — con persistencia en Supabase, logging en Google Sheets y notificaciones en tiempo real.
 
 ---
 
@@ -20,21 +20,20 @@
 │  WhatsApp    │────▶│                     │────▶│  OpenAI GPT-3.5  │
 │  (Meta API)  │     │   Node.js + Express │     │  (system prompt  │
 └──────────────┘     │      Backend        │     │   por vertical)  │
-                     │                     │     └──────────────────┘
-┌──────────────┐     │  • Webhook handler  │
-│  Web Chat    │────▶│  • Deduplicación    │────▶┌──────────────────┐
-│  (Frontend)  │     │  • Memoria sesión   │     │  Google Sheets   │
-└──────────────┘     │  • Multi-botType    │     │  (via Apps       │
-                     │                     │     │   Script)        │
-                     └─────────────────────┘     └──────────────────┘
-                                │
-                                ▼
-                     ┌─────────────────────┐
-                     │  Email Notification │
-                     │  (nuevo lead →      │
-                     │   notificación      │
-                     │   instantánea)      │
-                     └─────────────────────┘
+                     │   (Railway 24/7)    │     └──────────────────┘
+┌──────────────┐     │                     │
+│  Web Chat    │────▶│  • Webhook handler  │────▶┌──────────────────┐
+│  (Frontend)  │     │  • Deduplicación    │     │    Supabase      │
+└──────────────┘     │  • Historial sesión │     │  (DB principal)  │
+                     │  • Multi-botType    │     │  PostgreSQL      │
+                     │  • Rate limiting    │     └──────────────────┘
+                     └─────────────────────┘              │
+                                │                         ▼
+                                │              ┌──────────────────┐
+                                └─────────────▶│  Google Sheets   │
+                                               │  (notificaciones │
+                                               │  + vista humana) │
+                                               └──────────────────┘
 ```
 
 ---
@@ -54,24 +53,26 @@ Un solo backend — el vertical se selecciona vía `botType` en el request.
 ## ✨ Features del sistema
 
 ### 🤖 Conversación
-- Memoria de sesión por usuario (últimos 10 mensajes)
+- Historial de sesión persistente por usuario (Supabase — sobrevive reinicios)
 - Flujos estructurados paso a paso (agendamiento sin salirse del orden)
-- Detección de fin de conversación (goodbye words) → reset automático
+- Detección de fin de conversación (goodbye words) → actualización de estado automática
 - Reglas de negocio embebidas: horarios, sucursales, restricciones, edge cases
 
-### 📊 Data & Logging
-- **Google Sheets como DB** — cada conversación se guarda automáticamente vía Google Apps Script
-- Campos registrados: `Timestamp · Teléfono · Primer Mensaje · Fuente · Estado · Conversación · Message ID`
-- Estado del lead actualizado automáticamente (`Conversación finalizada` al detectar goodbye)
+### 🗄️ Persistencia (Supabase)
+- **`leads`** — captura de cada nuevo contacto con fuente, primer mensaje y estado
+- **`conversations`** — historial completo por usuario y canal
+- **`processed_messages`** — deduplicación persistente con limpieza automática cada 5 min
+- Estado del lead actualizado automáticamente en tiempo real
 
-### 📧 Notificaciones
+### 📊 Logging & Notificaciones (Google Sheets)
+- Cada conversación se guarda vía Google Apps Script como vista humana
 - Email automático al capturar cada nuevo lead
-- Notificación instantánea con datos del contacto
+- Campos: `Timestamp · Teléfono · Primer Mensaje · Fuente · Estado · Conversación`
 
 ### 🔒 Confiabilidad
-- Deduplicación de mensajes con cache (evita respuestas duplicadas de Meta API)
-- Limpieza automática del cache cada 5 minutos
+- Deduplicación de mensajes persistente en DB (evita respuestas duplicadas de Meta API)
 - Manejo de errores con respuesta de fallback al usuario
+- Deploy en Railway con redeploy automático en cada push a `main`
 
 ### 🌐 Multicanal
 - **WhatsApp** vía Meta Cloud API (webhook verificado)
@@ -83,11 +84,13 @@ Un solo backend — el vertical se selecciona vía `botType` en el request.
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend | Node.js + Express |
+| Backend | Node.js v20 + Express |
 | IA | OpenAI GPT-3.5-turbo |
 | Mensajería | Meta WhatsApp Cloud API v22.0 |
-| Base de datos | Google Sheets + Google Apps Script |
+| Base de datos | Supabase (PostgreSQL) |
+| Logging | Google Sheets + Google Apps Script |
 | Notificaciones | Email via Apps Script |
+| Deploy | Railway (24/7, auto-deploy desde GitHub) |
 | Frontend | HTML/CSS/JS — desplegado en Vercel |
 | Control de versiones | GitHub |
 
@@ -99,7 +102,7 @@ Un solo backend — el vertical se selecciona vía `botType` en el request.
 Usuario inicia conversación
         │
         ▼
-Lead capturado → Google Sheets + Email notification
+Lead capturado → Supabase (leads) + Google Sheets + Email
         │
         ▼
 1. ¿Qué tipo de estudio necesitas?
@@ -113,7 +116,7 @@ Lead capturado → Google Sheets + Email notification
 5. Nombre completo + teléfono
         │
         ▼
-Conversación guardada en Google Sheets
+Conversación guardada en Supabase + Google Sheets
         │
         ▼
 Usuario dice "gracias/adiós" → Estado: "Conversación finalizada"
@@ -125,29 +128,46 @@ Usuario dice "gracias/adiós" → Estado: "Conversación finalizada"
 
 ```
 whatsapp-bot/
-├── server.js          # Backend principal (Express + webhook + AI)
-├── .env               # Variables de entorno (tokens, keys)
+├── server.js          # Backend principal (Express + webhook + AI + Supabase)
+├── .env               # Variables de entorno (no incluido en repo)
+├── .gitignore         # .env y node_modules excluidos
 ├── package.json
 └── README.md
 ```
 
 ---
 
-## 🔜 Próximos pasos
+## ⚙️ Variables de entorno requeridas
 
-- [ ] Migrar persistencia de sesión a Supabase (PostgreSQL)
-- [ ] Agregar canal Telegram con el mismo backend
-- [ ] Dashboard de citas en tiempo real
-- [x] Video demo grabado y publicado
-- [ ] Pasar a producción con número de WhatsApp Business real
+```env
+PORT=3000
+VERIFY_TOKEN=tu_verify_token
+WHATSAPP_TOKEN=tu_whatsapp_token
+PHONE_NUMBER_ID=tu_phone_number_id
+OPENAI_API_KEY=tu_openai_key
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_SECRET_KEY=tu_supabase_secret_key
+```
+
+---
+
+## 🗺️ Roadmap
+
+- [x] ~~Migrar persistencia de sesión a Supabase (PostgreSQL)~~ ✅
+- [x] ~~Deploy del backend en Railway (24/7, auto-deploy)~~ ✅
+- [x] ~~Deduplicación de mensajes persistente en DB~~ ✅
+- [x] ~~Video demo grabado y publicado~~ ✅
+- [ ] Rate limiting por usuario (protección de tokens OpenAI)
+- [ ] Número permanente de WhatsApp Business (token que no expira)
+- [ ] Dashboard admin para ver leads y conversaciones desde Supabase
 - [ ] Integración con Google Calendar API
-- [ ] Deploy del backend en Railway (actualmente local)
+- [ ] Canal Telegram con el mismo backend
 
 ---
 
 ## 👨‍💻 Autor
 
 **Ayrton Cela** — Consulting Engineering Manager & AI Builder  
-Ciudad de México 🇲🡽
+Ciudad de México 🇲🇽
 
-> *Construido con vibe coding usando Claude Code*
+> *Construido con vibe coding usando Claude*
