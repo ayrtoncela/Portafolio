@@ -156,7 +156,8 @@ SUPABASE_SECRET_KEY=tu_supabase_secret_key
 - [x] ~~Migrar persistencia de sesión a Supabase (PostgreSQL)~~ Completado 27 Feb 2026 ✅
 - [x] ~~Deploy del backend en Railway (24/7, auto-deploy)~~ Completado 27 Feb 2026 ✅
 - [x] ~~Deduplicación de mensajes persistente en DB~~ Completado 27 Feb 2026 ✅
-- [x] ~~Video demo grabado y publicado~~ Completado 27 Feb 2026 ✅
+- [x] ~~Video demo grabado y publicado~~ (V1) Completado 2 Feb 2026 ✅
+- [ ] Video demo v2 (Supabase y Railway)
 - [ ] Rate limiting por usuario (protección de tokens OpenAI)
 - [ ] Número permanente de WhatsApp Business (token que no expira)
 - [ ] Dashboard admin para ver leads y conversaciones desde Supabase
