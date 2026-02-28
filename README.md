@@ -171,4 +171,4 @@ SUPABASE_SECRET_KEY=tu_supabase_secret_key
 **Ayrton Cela** — Consulting Engineering Manager & AI Builder  
 Ciudad de México 🇲🇽
 
-> *Construido con vibe coding usando Claude*
+> *Construido con ayuda de Claude*
