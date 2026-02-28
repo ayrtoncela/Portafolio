@@ -26,13 +26,13 @@
 │  (Frontend)  │     │  • Sesión + timeout │     │    Supabase      │
 └──────────────┘     │  • Rate limiting    │     │  (PostgreSQL)    │
                      │  • Multi-botType    │     └──────────────────┘
-                     └─────────────────────┘              │
-                                │                         ▼
-                                │              ┌──────────────────┐
-                                └─────────────▶│  Google Sheets   │
-                                               │  (log humano +   │
-                                               │   notificaciones)│
-                                               └──────────────────┘
+┌──────────────┐     │  • Admin dashboard  │              │
+│  Dashboard   │────▶│                     │              ▼
+│  /dashboard  │     └─────────────────────┘   ┌──────────────────┐
+└──────────────┘                │               │  Google Sheets   │
+                                └──────────────▶│  (log humano +   │
+                                                │   notificaciones)│
+                                                └──────────────────┘
 ```
 
 ---
@@ -67,6 +67,15 @@ Un solo backend — el vertical se selecciona vía `botType` en el request.
 * `rate_limits` — control de uso por usuario y global
 * Cleanup automático de mensajes procesados viejos vía función SQL
 
+### 📊 Admin Dashboard
+
+* Accesible en `/dashboard` con autenticación básica por password
+* Métricas en tiempo real: total leads, leads hoy, mensajes hoy, usuarios activos
+* Tabla de leads con teléfono, canal, primer mensaje, estado y última actividad
+* Historial de conversaciones expandible por usuario inline
+* Visualización de rate limits por usuario con barra de progreso
+* Auto-refresh cada 30 segundos
+
 ### 📊 Logging
 
 * **Google Sheets** como vista humana — cada conversación guardada vía Apps Script
@@ -84,6 +93,7 @@ Un solo backend — el vertical se selecciona vía `botType` en el request.
 * Filtro de mensajes stale — ignora reintentos de Meta (>30s de antigüedad)
 * Rate limiting: 20 msgs/hr por usuario · 500 msgs/hr global
 * Timeout de sesión: 30 min de inactividad limpia el historial silenciosamente
+* Dashboard protegido con autenticación HTTP Basic
 * Manejo de errores con respuesta de fallback al usuario
 
 ### 🌐 Multicanal
@@ -140,7 +150,8 @@ Conversación guardada en Supabase + Google Sheets
 
 ```
 whatsapp-bot/
-├── server.js          # Backend principal (Express + webhook + AI)
+├── server.js          # Backend principal (Express + webhook + AI + dashboard API)
+├── dashboard.html     # Admin dashboard UI
 ├── .env               # Variables de entorno (tokens, keys)
 ├── package.json
 └── README.md
@@ -161,7 +172,7 @@ whatsapp-bot/
 - [x] ~~Timeout de sesión automático (30 min)~~ ✅
 - [x] ~~Número permanente de WhatsApp Business real~~ ✅
 - [x] ~~Token permanente (System User de Meta)~~ ✅
-- [ ] Dashboard admin para ver leads y conversaciones
+- [x] ~~Admin dashboard con métricas, leads y conversaciones~~ ✅
 - [ ] Integración con Google Calendar API
 - [ ] Canal Telegram con el mismo backend
 - [ ] Soporte Instagram DMs (misma Meta API)
@@ -173,5 +184,5 @@ whatsapp-bot/
 **Ayrton Cela** — Consulting Engineering Manager & AI Builder  
 Ciudad de México 🇲🇽
 
-> *Construido con vibe coding usando Claude*
+> *Construido con ayuda de Claude*
 
