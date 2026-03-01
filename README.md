@@ -8,7 +8,7 @@
 ## 🚀 Demo en vivo
 
 🎥 **Video demo:** [Ver en YouTube](https://www.youtube.com/watch?v=_C-984BwlBQ)  
-🌐 **Frontend:** [web-page-saa-s.vercel.app](https://web-page-saa-s.vercel.app)  
+🌐 **Portfolio:** [ayrtoncela.vercel.app](https://ayrtoncela.vercel.app)  
 💬 **Chatbot widget:** disponible en la esquina inferior derecha del sitio
 
 ---
@@ -22,13 +22,13 @@
 └──────────────┘     │   Railway (24/7)    │     │   por vertical)  │
                      │                     │     └──────────────────┘
 ┌──────────────┐     │  • Webhook handler  │
-│  Web Chat    │────▶│  • Deduplicación    │────▶┌──────────────────┐
-│  (Frontend)  │     │  • Sesión + timeout │     │    Supabase      │
+│  Instagram   │────▶│  • Deduplicación    │────▶┌──────────────────┐
+│  DMs (Meta)  │     │  • Sesión + timeout │     │    Supabase      │
 └──────────────┘     │  • Rate limiting    │     │  (PostgreSQL)    │
                      │  • Multi-botType    │     └──────────────────┘
 ┌──────────────┐     │  • Admin dashboard  │              │
-│  Dashboard   │────▶│                     │              ▼
-│  /dashboard  │     └─────────────────────┘   ┌──────────────────┐
+│  Web Chat    │────▶│                     │              ▼
+│  (Frontend)  │     └─────────────────────┘    ┌──────────────────┐
 └──────────────┘                │               │  Google Sheets   │
                                 └──────────────▶│  (log humano +   │
                                                 │   notificaciones)│
@@ -42,7 +42,7 @@
 | Industria | Canal | Funcionalidades |
 | --- | --- | --- |
 | 🧪 **Laboratorio Clínico** | WhatsApp + Web | Agendamiento 5 pasos, 3 sucursales, instrucciones pre-análisis |
-| 💻 **Agencia de Software** | Web | Atención a leads, servicios, captura de contacto |
+| 💻 **Agencia de Software** | WhatsApp + Instagram + Web | Atención a leads, servicios, captura de contacto |
 | 🍽️ **Restaurante** | Web | Reservaciones, menú, horarios, pedidos |
 
 Un solo backend — el vertical se selecciona vía `botType` en el request.
@@ -99,6 +99,7 @@ Un solo backend — el vertical se selecciona vía `botType` en el request.
 ### 🌐 Multicanal
 
 * **WhatsApp** vía Meta Cloud API — número real de WhatsApp Business (`+52 993 234 0850`)
+* **Instagram DMs** vía Meta Graph API — webhook integrado, pendiente App Review
 * **Web chat** vía endpoint `/api/chat` — mismo backend, mismo AI
 
 ---
@@ -109,7 +110,7 @@ Un solo backend — el vertical se selecciona vía `botType` en el request.
 | --- | --- |
 | Backend | Node.js + Express |
 | IA | OpenAI GPT-3.5-turbo |
-| Mensajería | Meta WhatsApp Cloud API v22.0 |
+| Mensajería | Meta WhatsApp Cloud API v22.0 + Instagram Graph API |
 | Base de datos | Supabase (PostgreSQL) |
 | Hosting | Railway (24/7, auto-deploy desde GitHub) |
 | Logging humano | Google Sheets + Google Apps Script |
@@ -173,9 +174,11 @@ whatsapp-bot/
 - [x] ~~Número permanente de WhatsApp Business real~~ ✅
 - [x] ~~Token permanente (System User de Meta)~~ ✅
 - [x] ~~Admin dashboard con métricas, leads y conversaciones~~ ✅
+- [x] ~~Portfolio personal — ayrtoncela.vercel.app~~ ✅
+- [x] ~~Instagram DMs — webhook integrado y leads capturados~~ ✅
+- [ ] Instagram DMs — respuestas activas (pendiente App Review de Meta)
 - [ ] Integración con Google Calendar API
 - [ ] Canal Telegram con el mismo backend
-- [ ] Soporte Instagram DMs (misma Meta API)
 
 ---
 
