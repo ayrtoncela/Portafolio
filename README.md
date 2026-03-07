@@ -1,7 +1,7 @@
-# 🤖 WhatsApp + Instagram AI Bot — Multi-Industry Framework
+# 🤖 WhatsApp & Instagram AI Bot Framework
 
-> Agente conversacional multicanal construido con Node.js + OpenAI GPT-3.5 + Meta Cloud API.  
-> Un solo backend soporta múltiples industrias, canales y flujos de negocio — con base de datos real, rate limiting, dashboard y notificaciones en tiempo real.
+> Agente conversacional multicanal construido con Node.js + OpenAI + Meta API.  
+> Arquitectura multi-cliente: un backend base adaptado a cada industria con flujos, precios y lógica propios.
 
 ---
 
@@ -13,171 +13,130 @@
 
 ---
 
-## 🏗️ Arquitectura
+## 🏗️ Arquitectura base
 
 ```
-┌──────────────┐     ┌─────────────────────────┐     ┌──────────────────┐
-│  WhatsApp    │────▶│                         │────▶│  OpenAI GPT-3.5  │
-│  (Meta API)  │     │   Node.js + Express     │     │  (system prompt  │
-└──────────────┘     │      en Railway         │     │   por vertical)  │
-                     │                         │     └──────────────────┘
-┌──────────────┐     │  • Webhook handler      │
-│  Instagram   │────▶│  • Deduplicación        │────▶┌──────────────────┐
-│  DMs (Meta)  │     │  • Memoria de sesión    │     │     Supabase     │
-└──────────────┘     │  • Rate limiting        │     │  (PostgreSQL)    │
-                     │  • Multi-botType        │     └──────────────────┘
-┌──────────────┐     │  • Session timeout      │
-│  Web Chat    │────▶│  • Dashboard auth       │────▶┌──────────────────┐
-│  (Frontend)  │     │                         │     │  Google Sheets   │
-└──────────────┘     └─────────────────────────┘     │  (notificaciones)│
-                                                     └──────────────────┘
+┌──────────────────┐     ┌─────────────────────┐     ┌──────────────────┐
+│  Instagram DMs   │────▶│                     │────▶│  OpenAI GPT-4o   │
+│  WhatsApp        │     │   Node.js + Express │     │  (system prompt  │
+│  Web Chat        │────▶│      Backend        │     │   por cliente)   │
+└──────────────────┘     │                     │     └──────────────────┘
+                         │  • Webhook handler  │
+                         │  • State machine    │────▶┌──────────────────┐
+                         │  • Deduplicación    │     │    Supabase      │
+                         │  • Sesión + idioma  │     │  (PostgreSQL)    │
+                         │  • Human takeover   │     └──────────────────┘
+                         │  • Email notif.     │
+                         └─────────────────────┘
+                                    │
+                         ┌──────────┴──────────┐
+                         │   Dashboard HTML    │
+                         │   (por cliente)     │
+                         └─────────────────────┘
 ```
 
 ---
 
-## 🏢 Verticales implementados
+## 📦 Proyectos implementados
 
-| Industria | Canal | Funcionalidades |
+### 🎞️ Atico Film Lab — Instagram Bot (CDMX)
+**Repo:** [client-foto](https://github.com/ayrtoncela/client-foto)
+
+Laboratorio de fotografía analógica en CDMX. Bot de Instagram que maneja el flujo completo de pedidos de revelado y scan de rollos.
+
+| Canal | Stack | Estado |
 |---|---|---|
-| 🧪 **Laboratorio Clínico** | WhatsApp + Web | Agendamiento 5 pasos, 3 sucursales, instrucciones pre-análisis |
-| 💻 **Agencia de Software / IA** | WhatsApp + Instagram + Web | Atención a leads, servicios de automatización, captura de contacto |
-| 🍽️ **Restaurante** | Web | Reservaciones, menú, horarios, pedidos |
+| Instagram DMs | Node.js + Supabase + Railway + Resend | ✅ Producción |
 
-Un solo backend — el vertical se selecciona vía `botType` en el request.
-
----
-
-## ✨ Features del sistema
-
-### 🤖 Conversación
-- Memoria de sesión por usuario (últimos 10 mensajes)
-- Session timeout configurable (30 min de inactividad → reset automático)
-- Flujos estructurados paso a paso (agendamiento sin salirse del orden)
-- Detección de fin de conversación (goodbye words) → reset automático
-- Reglas de negocio embebidas: horarios, sucursales, restricciones, edge cases
-
-### 📊 Data & Logging
-- **Supabase (PostgreSQL)** como base de datos principal
-  - Tablas: `leads`, `conversations`, `processed_messages`, `rate_limits`
-  - RPC para limpieza automática de mensajes procesados
-- **Google Sheets** como capa de notificaciones y vista humana (vía Apps Script)
-- Campos registrados: `Timestamp · Teléfono/ID · Primer Mensaje · Fuente · Estado · Conversación`
-- Estado del lead actualizado automáticamente
-
-### 🛡️ Confiabilidad
-- **Deduplicación** de mensajes en Supabase (evita respuestas duplicadas de Meta API)
-- **Rate limiting** por usuario (20 msgs/hr) y global (500 msgs/hr)
-- **Filtro de mensajes stale** — ignora reintentos de Meta con >30s de antigüedad
-- **Echo filter** — ignora mensajes enviados por la propia app (is_echo)
-- Manejo de errores con respuesta de fallback al usuario
-
-### 📧 Notificaciones
-- Email automático al capturar cada nuevo lead
-- Notificación instantánea vía Google Apps Script
-
-### 🌐 Multicanal
-- **WhatsApp** vía Meta Cloud API (webhook verificado, producción)
-- **Instagram DMs** vía Instagram Graph API (`graph.instagram.com`)
-- **Web chat** vía endpoint `/api/chat` — mismo backend, mismo AI
-
-### 📈 Dashboard
-- Panel protegido con autenticación Basic Auth
-- Métricas en tiempo real: leads totales, leads hoy, mensajes hoy, usuarios activos
-- Vista de conversaciones por usuario
-- Monitor de rate limits
+**Funcionalidades:**
+- Máquina de estados completa: cotización → pedido → pago → entrega
+- Detección automática de idioma (ES/EN)
+- 3 sucursales + recolección a domicilio por colonias de CDMX
+- Generación de órdenes (ORD-YYYYMM-XXXX) + notificación por email
+- Recepción de comprobantes de pago (imagen) por DM
+- Dashboard de operaciones con pipeline visual, validación de pagos y handoff humano
+- Soporte para formatos 35mm y 120 con precios diferenciados
 
 ---
 
-## 🛠️ Stack
+### 🧪 Laboratorio Clínico — WhatsApp Bot
+**Canal:** WhatsApp + Web Chat
+
+Bot de agendamiento de estudios clínicos con flujo estructurado de 5 pasos.
+
+| Canal | Stack | Estado |
+|---|---|---|
+| WhatsApp + Web | Node.js + Google Sheets + Railway | ✅ Demo live |
+
+**Funcionalidades:**
+- Flujo de agendamiento paso a paso (tipo de estudio → sucursal → día → hora → datos)
+- 3 sucursales con horarios embebidos
+- Instrucciones pre-análisis por tipo de estudio
+- Logging automático a Google Sheets + notificación email por lead
+- Deduplicación de mensajes (caché en memoria)
+
+---
+
+### 💻 Agencia de Software — Web Chat Bot
+**Canal:** Web
+
+Bot de atención a leads para agencia de desarrollo.
+
+**Funcionalidades:**
+- Presentación de servicios y casos de uso
+- Captura de contacto y calificación de leads
+- Mismo backend que WhatsApp, canal web vía `/api/chat`
+
+---
+
+### 🍽️ Restaurante — Web Chat Bot
+**Canal:** Web
+
+Bot de reservaciones y atención de comensales.
+
+**Funcionalidades:**
+- Consulta de menú y horarios
+- Flujo de reservaciones
+- Manejo de pedidos
+
+---
+
+## ✨ Features del framework
+
+**Conversación**
+- Máquina de estados por cliente (flujos estructurados sin salirse del orden)
+- Memoria de sesión con timeout configurable
+- Detección de idioma automática (ES/EN)
+- Palabras clave globales para reset de menú (`menú`, `inicio`, `start`)
+- Fallback a OpenAI para mensajes fuera de flujo
+
+**Operaciones**
+- Dashboard HTML por cliente con autenticación
+- Human takeover — pausa el bot y permite respuesta manual del asesor
+- Pipeline visual de estado del pedido
+- Notificaciones push al cliente por Instagram/WhatsApp
+- Soporte para imágenes entrantes (comprobantes, fotos)
+
+**Infraestructura**
+- Deduplicación de mensajes via Supabase (`processed_messages`)
+- Session timeout configurable
+- Email transaccional via Resend
+- Deploy en Railway con variables de entorno
+
+---
+
+## 🛠️ Stack completo
 
 | Capa | Tecnología |
 |---|---|
-| Backend | Node.js + Express |
-| Hosting | Railway |
-| IA | OpenAI GPT-3.5-turbo |
+| Backend | Node.js 18 + Express |
+| IA | OpenAI GPT-4o-mini |
+| Mensajería | Meta Graph API (Instagram + WhatsApp) |
 | Base de datos | Supabase (PostgreSQL) |
-| Mensajería WhatsApp | Meta WhatsApp Cloud API v22.0 |
-| Mensajería Instagram | Meta Instagram Graph API v22.0 |
-| Notificaciones | Google Sheets + Apps Script |
-| Frontend | HTML/CSS/JS — desplegado en Vercel |
-| Control de versiones | GitHub |
-
----
-
-## 📋 Flujo del agente — Agencia de IA (Instagram/WhatsApp)
-
-```
-Usuario envía DM (Instagram o WhatsApp)
-        │
-        ▼
-Webhook recibe → deduplicación → rate limit check
-        │
-        ▼
-Lead capturado en Supabase → Notificación Google Sheets + Email
-        │
-        ▼
-1. ¿En qué industria o tipo de negocio estás?
-        ↓
-2. Identifica el problema principal
-        ↓
-3. Presenta el servicio más relevante con ejemplo concreto
-        ↓
-4. Ofrece agendar llamada o continuar por WhatsApp
-        │
-        ▼
-Conversación guardada en Supabase + Google Sheets
-        │
-        ▼
-Usuario dice "gracias/adiós" → Estado: "Conversación finalizada" → reset sesión
-```
-
----
-
-## 📁 Estructura del proyecto
-
-```
-whatsapp-bot/
-├── server.js          # Backend principal (Express + webhook + AI + dashboard)
-├── dashboard.html     # Panel de administración
-├── .env               # Variables de entorno (tokens, keys)
-├── package.json
-└── README.md
-```
-
----
-
-## 🔧 Variables de entorno requeridas
-
-```env
-WHATSAPP_TOKEN=          # Meta WhatsApp Business token
-PHONE_NUMBER_ID=         # ID del número de WhatsApp
-INSTAGRAM_TOKEN=         # Token IGAAC de Instagram Graph API
-INSTAGRAM_ACCOUNT_ID=    # Instagram Business Account ID
-OPENAI_API_KEY=          # OpenAI API key
-SUPABASE_URL=            # URL del proyecto Supabase
-SUPABASE_SECRET_KEY=     # Service role key de Supabase
-VERIFY_TOKEN=            # Token de verificación del webhook
-DASHBOARD_PASSWORD=      # Password para el dashboard
-PORT=3000
-```
-
----
-
-## ✅ Estado del proyecto
-
-| Feature | Estado |
-|---|---|
-| WhatsApp Bot (producción) | ✅ Live |
-| Instagram DMs Bot | ✅ Live (pendiente App Review) |
-| Web Chat widget | ✅ Live |
-| Supabase como DB principal | ✅ Implementado |
-| Rate limiting | ✅ Implementado |
-| Session timeout | ✅ Implementado |
-| Dashboard de métricas | ✅ Implementado |
-| Deploy en Railway | ✅ Live |
-| App Review Meta (instagram_business_manage_messages) | ⏳ En proceso |
-| Google Calendar API | 🔜 Próximo |
-| Telegram channel | 🔜 Próximo |
+| Email | Resend |
+| Deploy | Railway |
+| Frontend dashboard | HTML/CSS/JS vanilla |
+| Frontend web | Vercel |
 
 ---
 
