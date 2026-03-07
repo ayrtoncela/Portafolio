@@ -39,7 +39,7 @@
 
 ## 📦 Proyectos implementados
 
-### 🎞️ Atico Film Lab — Instagram Bot (CDMX)
+### 🎞️ Film Lab — Instagram Bot (CDMX)
 **Repo:** [client-foto](https://github.com/ayrtoncela/client-foto)
 
 Laboratorio de fotografía analógica en CDMX. Bot de Instagram que maneja el flujo completo de pedidos de revelado y scan de rollos.
